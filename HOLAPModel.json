@@ -1,0 +1,106 @@
+{
+    "name": "HOLAPModelPipeline",
+    "properties": {
+        "description": "Extract data from sources, transform and load into a Hybrid OLAP model",
+        "activities": [
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM SourceTable"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "FactTable",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_fact_table"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SourceDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "DataFlow",
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "query": "SELECT * FROM dbo.FactTable"
+                    },
+                    "transforms": [
+                        {
+                            "type": "DerivedColumn",
+                            "expression": "UPPER([column_name])"
+                        },
+                        {
+                            "type": "Pivot",
+                            "pivotKeyColumns": [
+                                "column_name"
+                            ],
+                            "pivotValueColumn": {
+                                "sourceColumn": "column_name",
+                                "valueColumn": "pivot_value"
+                            }
+                        }
+                    ],
+                    "sink": {
+                        "type": "MOLAP",
+                        "writeBatchSize": 10000,
+                        "writeBatchTimeout": "60.00:00:00"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "MOLAPDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "MOLAP",
+                        "sqlReaderQuery": "SELECT * FROM MOLAPDataset"
+                    },
+                    "sink": {
+                        "type": "RelationalDW",
+                        "sqlWriterTableName": "DimensionTables",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_dimension_tables"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "MOLAPDataset",
+                        "type": "DatasetReference"
+                    }
+                    ],
+                    "outputs": [
+                    {
+                    "referenceName": "ROLAPDataset",
+                    "type": "DatasetReference"
+                    }
+                    ]
+                    }
+                    ],
+                    "start": "2021-01-01T00:00:00Z",
+                    "end": "2021-01-02T00:00:00Z",
+                    "isPaused": false
+                    }
+                    }
+                

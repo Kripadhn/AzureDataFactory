@@ -1,0 +1,81 @@
+{
+    "name": "ROLAPModelPipeline",
+    "properties": {
+        "description": "Extract data from sources, transform and load into a Relational OLAP model",
+        "activities": [
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM SourceTable"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "FactTable",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_fact_table"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SourceDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "DataFlow",
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "query": "SELECT * FROM dbo.FactTable"
+                    },
+                    "transforms": [
+                        {
+                            "type": "DerivedColumn",
+                            "expression": "UPPER([column_name])"
+                        },
+                        {
+                            "type": "Pivot",
+                            "pivotKeyColumns": [
+                                "column_name"
+                            ],
+                            "pivotValueColumn": {
+                                "sourceColumn": "column_name",
+                                "valueColumn": "pivot_value"
+                            }
+                        }
+                    ],
+                    "sink": {
+                        "type": "RelationalDW",
+                        "writeBatchSize": 10000,
+                        "writeBatchTimeout": "60.00:00:00"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "RelationalDWDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            }
+        ],
+        "start": "2020-01-01T00:00:00Z",
+        "end": "2020-01-01T01:00:00Z",
+        "isPaused": false,
+        "hubName": "adf_hub",
+        "pipelineMode": "Scheduled"
+    }
+}

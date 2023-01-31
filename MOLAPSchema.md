@@ -1,0 +1,1 @@
+Multi-dimensional OLAP (MOLAP) model: The MOLAP model is a cube-based data warehousing model where data is organized into a cube structure, allowing for fast and efficient querying of data. In ADF, the MOLAP model can be implemented by creating a pipeline to extract data from various sources, transform it, and load it into a cube in Azure Analysis Services.

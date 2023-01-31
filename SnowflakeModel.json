@@ -1,0 +1,88 @@
+{
+    "name": "SnowflakeSchemaPipeline",
+    "properties": {
+        "description": "Extract data from sources, transform and load into a snowflake schema model in Azure Synapse Analytics",
+        "activities": [
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM SourceTable"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "FactTable",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_fact_table"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SourceDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM DimensionTable1"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "DimensionTable1",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_dimension_table1"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "DimensionDataset1",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "DimensionDataset1",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM DimensionTable2"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "DimensionTable2",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_dimension_table2"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "DimensionDataset2",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "DimensionDataset2",
+                        "type": "DatasetReference"
+                    }
+                ]
+            }
+        ],
+        "start": "2020-01-01T00:00:00Z",
+        "end": "2020-02-01T00:00:00Z"
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "name": "StarSchemaPipeline",
+    "properties": {
+        "description": "Extract data from sources, transform and load into a star schema model in Azure Synapse Analytics",
+        "activities": [
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM SourceTable"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "FactTable",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_fact_table"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SourceDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "

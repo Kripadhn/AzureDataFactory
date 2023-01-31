@@ -1,0 +1,100 @@
+{
+    "name": "MOLAPModelPipeline",
+    "properties": {
+        "description": "Extract data from sources, transform and load into an Azure Analysis Services instance",
+        "activities": [
+            {
+                "type": "Copy",
+                "typeProperties": {
+                    "source": {
+                        "type": "SQL",
+                        "sqlReaderQuery": "SELECT * FROM SourceTable"
+                    },
+                    "sink": {
+                        "type": "SQLDW",
+                        "sqlWriterTableName": "FactTable",
+                        "sqlWriterStoredProcedureName": "dbo.sp_load_fact_table"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SourceDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "DataFlow",
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "query": "SELECT * FROM dbo.FactTable"
+                    },
+                    "sink": {
+                        "type": "AzureAnalysisServicesSink",
+                        "tableName": "FactTable"
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "FactDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "AzureAnalysisServicesDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            },
+            {
+                "type": "HDInsightSpark",
+                "typeProperties": {
+                    "sparkJobLinkedService": {
+                        "type": "HDInsightSpark",
+                        "referenceName": "HDInsightSparkLinkedService",
+                        "typeProperties": {
+                            "clusterUri": "https://<clusterName>.azurehdinsight.net",
+                            "httpUserName": "admin",
+                            "httpPassword": {
+                                "type": "SecureString",
+                                "value": "password"
+                            }
+                        }
+                    },
+                    "mainClass": "org.apache.spark.sql.SparkSession",
+                    "arguments": [
+                        "spark-shell",
+                        "--master",
+                        "yarn",
+                        "--num-executors",
+                        "3",
+                        "--executor-memory",
+                        "2GB"
+                    ]
+                },
+                "inputs": [
+                    {
+                        "referenceName": "AzureAnalysisServicesDataset",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "MOLAPCubeDataset",
+                        "type": "DatasetReference"
+                    }
+                ]
+            }
+        ],
+        "start": "2020-01-01T00:00:00Z",
+        "end": "2020-02-01T00:00:00Z"
+    }
+}
