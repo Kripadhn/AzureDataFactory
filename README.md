@@ -18,4 +18,9 @@ Data backup and recovery: ADF can be used to automate data backup and recovery p
 
 Data security and compliance: ADF provides built-in security features, such as encryption and access control, to ensure data security and compliance with regulatory standards.
 
+<<<<<<< HEAD
 Data reporting and visualization: ADF can be used to extract data from various sources, transform it, and load it into a reporting or visualization tool, such as Power BI, for business insights.
+=======
+Data reporting and visualization: ADF can be used to extract data from various sources, transform it, and load it into a reporting or visualization tool, such as Power BI, for business insights.
+
+>>>>>>> 9c174e8e414f4bb0790075984f07d351248d3e18
